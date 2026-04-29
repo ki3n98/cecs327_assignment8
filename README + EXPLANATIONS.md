@@ -35,5 +35,10 @@ Thus, the server queries these tables directly using time-windowed SQL queries f
 owns that house's metadata) first. If the primary database does not have full coverage of the requested time window, it queries the secondary (teamate's) database
 to fill the gap. Moreover, results from both sources are merged, deduplicated by asset_uid, payload-timestamp, and processed together as one unified dataset.
 
+3.) After fetching from the primary database, the server checks the earliest timestamp returned. Thus, if that timestamp is later than the requested window start,
+or if no rows were returned at all, the system concludes the primary database has incomplete coverage and fetches the missing portion from the secondary database.
 
-
+4.) On startup, the server reads device metadata from both databases and builds a unified DeviceRegistry that maps every asset UID to its house, device type,
+sensor name, measurement kind, and calibration values. This registry is employed at query time to identify which sensors are relevant, attribute payload rows to
+the correct house, and convert raw sensor values to meaningful units. Furthermore, DataNiz sharing was enabled after every student had generated local-only data, so every
+database has full local history and the teamate's data only from the sharing start time onward. The gap-fill logic handles this assymmetry automatically.
