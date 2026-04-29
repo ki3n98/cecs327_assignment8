@@ -27,3 +27,13 @@ and the terminals will announce this closed connection.
 
 EXPLANATIONS:
 
+1.) The server reads two database URLs from a .env file which are DATABASE_KIEN_URL and DATABASE_ALEX_URL. This basically opens a live connection to both Neon PostgreSQL
+databases on startup using psycopg2. House A sensor data is stored in the Iot_virtual table and House B sensor data is stored in the sensor_data_virtual table.
+Thus, the server queries these tables directly using time-windowed SQL queries filtered by board asset UID.
+
+2.) For every query, the server identifies the relevant sensors from the DeviceRegistry, grouped by house. It queries the primary database, (which is the one that
+owns that house's metadata) first. If the primary database does not have full coverage of the requested time window, it queries the secondary (teamate's) database
+to fill the gap. Moreover, results from both sources are merged, deduplicated by asset_uid, payload-timestamp, and processed together as one unified dataset.
+
+
+
