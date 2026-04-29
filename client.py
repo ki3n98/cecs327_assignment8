@@ -4,7 +4,7 @@ import ipaddress
 # Acceptable Queries
 acceptable_queries = [
     "What is the average moisture inside our kitchen fridges in the past hours, week and month?",
-    "What is the average water consumption per cycle across our smart dishwashers in the past hour, week and month?"
+    "What is the average water consumption per cycle across our smart dishwashers in the past hour, week and month?",
     "Which house consumed more electricity in the past 24 hours, and by how much?"
 ]
 
