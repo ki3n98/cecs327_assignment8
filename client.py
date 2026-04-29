@@ -54,7 +54,9 @@ while True:
     message = input("\nEnter your query (or 'quit' to exit): ")
     if message.lower() == 'quit':
         break
-    if message not in acceptable_queries:
+    if message in {"1", "2", "3"}:
+        message = acceptable_queries[int(message) - 1]
+    elif message not in acceptable_queries:
         print("Sorry, this query cannot be processed. Please try one of the supported queries.")
         continue
     # Send message to server
