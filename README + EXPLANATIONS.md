@@ -1,44 +1,41 @@
-README:
+# README
 
-Full instructions of how to run the system:
+## Full instructions on how to run the system
 
-1.) Construct a .env file inside the server folder with both database URLs
-    Ex) DATABASE_KIEN_URL="URL"
-        DATABASE_ALEX_URL="URL"
-2.) In terminal use the command "cd server" in order to navigate to the server folder as the working directory.
-3.) In cd server, employ the command "python3 server.py" if on mac, and if on windows, employ "python server.py".
-4.) The system will prompt you to "Enter server IP address to bind:", enter 127.0.0.1
-5.) The system will then ask you to "Enter port number:", enter 5000
-6.) The server will then claim, "Server listening on 127.0.0.1:5000"
-7.) At this point, open a new terminal, and employ the command "python3 client.py" if on mac, and if on windows, employ "python client.py".
-8.) The system will prompt you to "Enter server IP address:", enter 127.0.0.1
-9.) The system will then prompt you to "Enter server port number:", enter 5000
-10.) At this point on the server terminal, it will claim "Connection from: ('127.0.0.1', 50207)".
-11.) On the client side it will claim 
+1. Construct a `.env` file inside the `server` folder with both database URLs:
+   ```
+   DATABASE_KIEN_URL="URL"
+   DATABASE_ALEX_URL="URL"
+   ```
+2. In the terminal, use the command `cd server` to navigate to the server folder as the working directory.
+3. In `cd server`, employ the command `python3 server.py` if on Mac, or `python server.py` if on Windows.
+4. The system will prompt you to `Enter server IP address to bind:` — enter `127.0.0.1`.
+5. The system will then ask you to `Enter port number:` — enter `5000`.
+6. The server will then claim: `Server listening on 127.0.0.1:5000`.
+7. At this point, open a new terminal and employ the command `python3 client.py` if on Mac, or `python client.py` if on Windows.
+8. The system will prompt you to `Enter server IP address:` — enter `127.0.0.1`.
+9. The system will then prompt you to `Enter server port number:` — enter `5000`.
+10. At this point, on the server terminal, it will claim: `Connection from: ('127.0.0.1', 50207)`.
+11. On the client side it will claim:
 
-"Supported queries:
-   What is the average moisture inside our kitchen fridges in the past hours, week and month?
-   What is the average water consumption per cycle across our smart dishwashers in the past hour, week and month?
-   Which house consumed more electricity in the past 24 hours, and by how much?
-   Enter your query (or 'quit' to exit):"
+    ```
+    Supported queries:
+       What is the average moisture inside our kitchen fridges in the past hours, week and month?
+       What is the average water consumption per cycle across our smart dishwashers in the past hour, week and month?
+       Which house consumed more electricity in the past 24 hours, and by how much?
+       Enter your query (or 'quit' to exit):
+    ```
 
-At this point enter 1, 2, 3, or "quit" to exit and the server terminal will receive the appropriate query or if quit is selected, the connection is closed
-and the terminals will announce this closed connection.
+At this point, enter `1`, `2`, `3`, or `quit` to exit. The server terminal will receive the appropriate query, or — if `quit` is selected — the connection is closed and the terminals will announce this closed connection.
 
-EXPLANATIONS:
+---
 
-1.) The server reads two database URLs from a .env file which are DATABASE_KIEN_URL and DATABASE_ALEX_URL. This basically opens a live connection to both Neon PostgreSQL
-databases on startup using psycopg2. House A sensor data is stored in the Iot_virtual table and House B sensor data is stored in the sensor_data_virtual table.
-Thus, the server queries these tables directly using time-windowed SQL queries filtered by board asset UID.
+# EXPLANATIONS
 
-2.) For every query, the server identifies the relevant sensors from the DeviceRegistry, grouped by house. It queries the primary database, (which is the one that
-owns that house's metadata) first. If the primary database does not have full coverage of the requested time window, it queries the secondary (teamate's) database
-to fill the gap. Moreover, results from both sources are merged, deduplicated by asset_uid, payload-timestamp, and processed together as one unified dataset.
+1. The server reads two database URLs from a `.env` file: `DATABASE_KIEN_URL` and `DATABASE_ALEX_URL`. This basically opens a live connection to both Neon PostgreSQL databases on startup using `psycopg2`. House A sensor data is stored in the `Iot_virtual` table and House B sensor data is stored in the `sensor_data_virtual` table. Thus, the server queries these tables directly using time-windowed SQL queries filtered by board asset UID.
 
-3.) After fetching from the primary database, the server checks the earliest timestamp returned. Thus, if that timestamp is later than the requested window start,
-or if no rows were returned at all, the system concludes the primary database has incomplete coverage and fetches the missing portion from the secondary database.
+2. For every query, the server identifies the relevant sensors from the `DeviceRegistry`, grouped by house. It queries the primary database (the one that owns that house's metadata) first. If the primary database does not have full coverage of the requested time window, it queries the secondary (teammate's) database to fill the gap. Moreover, results from both sources are merged, deduplicated by `asset_uid` and payload-timestamp, and processed together as one unified dataset.
 
-4.) On startup, the server reads device metadata from both databases and builds a unified DeviceRegistry that maps every asset UID to its house, device type,
-sensor name, measurement kind, and calibration values. This registry is employed at query time to identify which sensors are relevant, attribute payload rows to
-the correct house, and convert raw sensor values to meaningful units. Furthermore, DataNiz sharing was enabled after every student had generated local-only data, so every
-database has full local history and the teamate's data only from the sharing start time onward. The gap-fill logic handles this assymmetry automatically.
+3. After fetching from the primary database, the server checks the earliest timestamp returned. Thus, if that timestamp is later than the requested window start, or if no rows were returned at all, the system concludes the primary database has incomplete coverage and fetches the missing portion from the secondary database.
+
+4. On startup, the server reads device metadata from both databases and builds a unified `DeviceRegistry` that maps every asset UID to its house, device type, sensor name, measurement kind, and calibration values. This registry is employed at query time to identify which sensors are relevant, attribute payload rows to the correct house, and convert raw sensor values to meaningful units. Furthermore, DataNiz sharing was enabled after every student had generated local-only data, so every database has full local history and the teammate's data only from the sharing start time onward. The gap-fill logic handles this asymmetry automatically.
